@@ -1,33 +1,75 @@
 # City Weather API
 
-TODO (you): one or two sentences on what this service does.
+An Express API that uses Open-Meteo to return current weather and a three-day forecast for a city, or compare weather across multiple cities. It supports validation, error handling, request timeouts, and in-memory caching.
 
 ## Run it
 
-TODO (you): the commands to install and start it, including copying `.env.example` to `.env`.
+Requires Node.js 24.
+
+```bash
+npm install
+cp .env.example .env
+npm run dev
+```
 
 ## Environment variables
 
-TODO (you): a table with every variable from `.env.example`, its default, and what it controls.
+| Variable | Default | Purpose |
+|---|---|---|
+| `PORT` | `4000` | Server port |
+| `GEOCODING_URL` | `https://geocoding-api.open-meteo.com/v1` | Geocoding API base URL |
+| `FORECAST_URL` | `https://api.open-meteo.com/v1` | Forecast API base URL |
+| `UPSTREAM_TIMEOUT_MS` | `5000` | Timeout for Open-Meteo requests in milliseconds |
+| `CACHE_TTL_SECONDS` | `600` | Cache lifetime in seconds |
 
 ## Endpoints
 
-TODO (you): each endpoint with an example request and a short description of the response.
+| Method | Example request | Response |
+|---|---|---|
+| GET | `/api/weather?city=Toronto` | `200`: Current weather and three-day forecast in `data`, plus `attribution` |
+| GET | `/api/compare?cities=Toronto,Vancouver,Halifax` | `200`: Per-city weather results or errors and a summary of successful/failed lookups, warmest, and coldest city |
+| GET | `/api/cache/stats` | `200`: Cache `entries`, `hits`, `misses`, and `ttlSeconds` in `data` |
 
 ## Testing
 
-TODO (you): one `curl` command for each of the 10 requests on the assignment page, with the status
-code it should get on a freshly started server. On Windows, run these in Git Bash. An example to copy:
+Run these commands in Git Bash on Windows against a freshly started server.
 
 ```bash
-# Weather for a city: 200
+# 1. Weather for a city: 200
 curl -i "http://localhost:4000/api/weather?city=Toronto"
+
+# 2. Same city again (cached): 200
+curl -i "http://localhost:4000/api/weather?city=Toronto"
+
+# 3. Missing city: 400
+curl -i "http://localhost:4000/api/weather"
+
+# 4. City that does not exist: 404
+curl -i "http://localhost:4000/api/weather?city=Qwertyville"
+
+# 5. Compare three cities: 200
+curl -i "http://localhost:4000/api/compare?cities=Toronto,Vancouver,Halifax"
+
+# 6. Compare with one unknown city: 200
+curl -i "http://localhost:4000/api/compare?cities=Toronto,Halifax,Qwertyville"
+
+# 7. Compare too many cities: 400
+curl -i "http://localhost:4000/api/compare?cities=Toronto,Vancouver,Halifax,Ottawa,Calgary,Montreal"
+
+# 8. Compare with a repeated city: 400
+curl -i "http://localhost:4000/api/compare?cities=Toronto,toronto"
+
+# 9. Cache statistics: 200
+curl -i "http://localhost:4000/api/cache/stats"
+
+# 10. Unknown route: 404
+curl -i "http://localhost:4000/api/unknown"
 ```
 
 ## Data source
 
-TODO (you): credit Open-Meteo with a link to https://open-meteo.com/.
+Weather data provided by [Open-Meteo](https://open-meteo.com/).
 
 ## AI use
 
-TODO (you): each AI tool you used and what for, or "No AI tools used."
+No AI Used for project
